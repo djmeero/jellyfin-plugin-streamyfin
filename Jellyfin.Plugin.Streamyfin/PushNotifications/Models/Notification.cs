@@ -58,12 +58,24 @@ public class Notification
     [JsonProperty(PropertyName = "data", NullValueHandling = NullValueHandling.Ignore)]
     public object? Data { get; set; }
 
+    /// <summary>
+    /// Optional rich-media attachment displayed alongside the notification (e.g. a movie poster).
+    /// The image URL must be publicly reachable over HTTPS. Forwarded as ExpoNotificationRequest.richContent.
+    /// When set, mutableContent is automatically enabled so iOS can fetch and render the image.
+    /// </summary>
+    [JsonProperty(PropertyName = "richContent", NullValueHandling = NullValueHandling.Ignore)]
+    public RichContent? RichContent { get; set; }
+
     public ExpoNotificationRequest ToExpoNotification() => new()
     {
         Title = Title,
         Subtitle = Subtitle,
         Body = Body,
-        Data = NormalizeJsonValue(Data)
+        Data = NormalizeJsonValue(Data),
+        RichContent = RichContent,
+        // iOS requires mutableContent=true for the notification service extension to fetch
+        // and attach the image. Auto-enable when an image is provided so callers don't have to.
+        MutableContent = !string.IsNullOrWhiteSpace(RichContent?.Image)
     };
 
     /// <summary>

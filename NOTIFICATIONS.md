@@ -47,7 +47,10 @@ value: `MediaBrowser Token="{apiKey}"`
     "userId": "string",   // Target Jellyfin user id this notification is for
     "username": "string", // Target Jellyfin username this notification is for
     "isAdmin": false,     // Boolean to determine if notification also targets admins.
-    "data": {}            // Optional JSON object delivered to the client app for deep-linking (see below)
+    "data": {},           // Optional JSON object delivered to the client app for deep-linking (see below)
+    "richContent": {      // Optional rich-media attachment (e.g. movie poster)
+      "image": "https://example.com/poster.jpg"
+    }
   }
 ]
 ```
@@ -73,6 +76,17 @@ Recognized shapes (mirrors what the plugin auto-generates for Item Added events)
 // Open a series (optionally focused on a season)
 { "type": "series",  "seriesId": "sr34...", "seasonIndex": 1 }
 ```
+
+## Rich Content (`richContent`)
+
+The optional `richContent.image` field attaches an image to the notification.
+On Android the image is shown in the expanded BigPictureStyle notification; on iOS
+it requires the Expo notification service extension (the plugin auto-enables
+`mutableContent` whenever an image is provided so this works out of the box).
+
+The image URL must be **publicly reachable over HTTPS** — Expo's push servers fetch
+the image and forward it to APNs/FCM, so private/local URLs (e.g. `192.168.x.x` or
+`localhost`) will not work.
 
 ---
 

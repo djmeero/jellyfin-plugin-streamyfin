@@ -132,4 +132,23 @@ public class ExpoNotificationRequest
     /// </summary>
     [JsonProperty(PropertyName = "mutableContent")]
     public bool MutableContent { get; set; }
+
+    /// <summary>
+    /// Rich content (image attachment) included with the notification.
+    /// On iOS this requires mutableContent=true and the Expo notification service extension.
+    /// On Android the image is rendered in the BigPictureStyle expanded notification.
+    /// https://docs.expo.dev/push-notifications/sending-notifications/#message-request-format
+    /// </summary>
+    [JsonProperty(PropertyName = "richContent", DefaultValueHandling = DefaultValueHandling.Ignore)]
+    public RichContent? RichContent { get; set; }
+}
+
+/// <summary>
+/// Rich-media attachment for an Expo push notification. Currently Expo only supports
+/// a single image URL; the URL must be publicly reachable over HTTPS.
+/// </summary>
+public class RichContent
+{
+    [JsonProperty(PropertyName = "image", DefaultValueHandling = DefaultValueHandling.Ignore)]
+    public string? Image { get; set; }
 }
