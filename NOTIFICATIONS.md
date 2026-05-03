@@ -46,13 +46,33 @@ value: `MediaBrowser Token="{apiKey}"`
     "body": "string",     // Notification body (required)
     "userId": "string",   // Target Jellyfin user id this notification is for
     "username": "string", // Target Jellyfin username this notification is for
-    "isAdmin": false      // Boolean to determine if notification also targets admins.
+    "isAdmin": false,     // Boolean to determine if notification also targets admins.
+    "data": {}            // Optional JSON object delivered to the client app for deep-linking (see below)
   }
 ]
 ```
 
 ## Notifying All Users
 To do this, all you have to do is populate the title and body. Other fields are not required.
+
+## Deep Linking (`data`)
+
+The optional `data` field is forwarded verbatim into the Expo push payload and is read by
+the Streamyfin client when the user taps the notification. Use it to deep-link the user to a
+specific item or page. Total notification payload must stay under ~4KiB.
+
+Recognized shapes (mirrors what the plugin auto-generates for Item Added events):
+
+```json
+// Open a movie's detail page
+{ "type": "movie",   "id": "ab12cd34..." }
+
+// Open a specific episode's detail page
+{ "type": "episode", "id": "ep12...",     "seriesId": "sr34...", "seasonIndex": 2 }
+
+// Open a series (optionally focused on a season)
+{ "type": "series",  "seriesId": "sr34...", "seasonIndex": 1 }
+```
 
 ---
 
