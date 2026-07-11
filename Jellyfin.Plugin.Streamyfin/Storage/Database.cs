@@ -30,6 +30,7 @@ public class Database : IDisposable
     protected virtual TempStoreMode TempStore => TempStoreMode.Memory;
     
     private const string DeviceTokensTable = "device_tokens";
+    private const string IssueParticipantsTable = "issue_participants";
 
     public Database(string path)
     {
@@ -46,7 +47,8 @@ public class Database : IDisposable
         string[] queries =
         [
             $"create table if not exists {DeviceTokensTable} (DeviceId GUID PRIMARY KEY, Token TEXT NOT NULL, UserId GUID NOT NULL, Timestamp INTEGER NOT NULL)",
-            $"create index if not exists idx_{DeviceTokensTable}_user on {DeviceTokensTable}(UserId)"
+            $"create index if not exists idx_{DeviceTokensTable}_user on {DeviceTokensTable}(UserId)",
+            $"create table if not exists {IssueParticipantsTable} (IssueId TEXT NOT NULL, Username TEXT NOT NULL, PRIMARY KEY (IssueId, Username))"
         ];
 
         connection.RunQueries(queries);
@@ -86,6 +88,58 @@ public class Database : IDisposable
         }
     }
     
+    /// <summary>
+    /// Records a participant (by Jellyfin username) for a Jellyseerr issue so that
+    /// future comments/resolutions can be routed only to people involved in the issue.
+    /// Idempotent — duplicate (issueId, username) pairs are ignored.
+    /// </summary>
+    /// <param name="issueId">Jellyseerr issue id (stored as text)</param>
+    /// <param name="username">Jellyfin username of the participant</param>
+    public void AddIssueParticipant(string issueId, string username)
+    {
+        if (string.IsNullOrWhiteSpace(issueId) || string.IsNullOrWhiteSpace(username))
+        {
+            return;
+        }
+
+        using (WriteLock.Write())
+        {
+            using var connection = CreateConnection();
+            connection.RunInTransaction(db =>
+            {
+                using var statement = db.PrepareStatement(
+                    $"insert or ignore into {IssueParticipantsTable}(IssueId, Username) values (@IssueId, @Username);");
+                statement.TryBind("@IssueId", issueId);
+                statement.TryBind("@Username", username);
+                statement.ExecuteNonQuery();
+            });
+        }
+    }
+
+    /// <summary>
+    /// Gets the Jellyfin usernames recorded as participants of a Jellyseerr issue.
+    /// </summary>
+    /// <param name="issueId">Jellyseerr issue id</param>
+    /// <returns>List of Jellyfin usernames</returns>
+    public List<string> GetIssueParticipants(string issueId)
+    {
+        var result = new List<string>();
+        if (string.IsNullOrWhiteSpace(issueId))
+        {
+            return result;
+        }
+
+        using (WriteLock.Read())
+        {
+            using var connection = CreateConnection(true);
+            using var statement = connection.PrepareStatement(
+                $"select Username from {IssueParticipantsTable} where IssueId = @IssueId;");
+            statement.TryBind("@IssueId", issueId);
+            result.AddRange(statement.ExecuteQuery().Select(row => row.GetString(0)));
+            return result;
+        }
+    }
+
     /// <summary>
     /// Gets all known device tokens
     /// </summary>
@@ -214,6 +268,26 @@ public class Database : IDisposable
                 using var statement = db.PrepareStatement($"delete from {DeviceTokensTable} where DeviceId=@DeviceId;");
 
                 statement.TryBind("@DeviceId", deviceId);
+                statement.ExecuteNonQuery();
+            });
+        }
+    }
+
+    /// <summary>
+    /// Removes every row holding the given push token, regardless of device id.
+    /// Used to prune tokens FCM reports as unregistered/invalid.
+    /// </summary>
+    /// <param name="token">Raw FCM registration token</param>
+    public void RemoveDeviceTokensByToken(string token)
+    {
+        using (WriteLock.Write())
+        {
+            using var connection = CreateConnection();
+            connection.RunInTransaction(db =>
+            {
+                using var statement = db.PrepareStatement($"delete from {DeviceTokensTable} where Token=@Token;");
+
+                statement.TryBind("@Token", token);
                 statement.ExecuteNonQuery();
             });
         }

@@ -40,7 +40,7 @@ public class SessionStartEvent(
             return;
         }
 
-        ExpoNotificationRequest[] notifications = [
+        NotificationRequest[] notifications = [
             new()
             {
                 Title = _localization.GetString("SessionStartTitle"),

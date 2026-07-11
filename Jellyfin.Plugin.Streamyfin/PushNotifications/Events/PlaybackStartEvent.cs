@@ -64,7 +64,7 @@ public class PlaybackStartEvent(
                     item: eventArgs.Item
                 )
             )
-            .OfType<ExpoNotificationRequest>()
+            .OfType<NotificationRequest>()
             .Where(notification => !HasRecentlyProcessed(notification.Body))
             .ToArray();
 

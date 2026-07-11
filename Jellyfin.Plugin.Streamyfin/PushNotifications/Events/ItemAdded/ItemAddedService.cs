@@ -192,7 +192,7 @@ public class ItemAddedService : BaseEvent, IHostedService
         data["seriesId"] = refreshedSeason.SeriesId.ToString("N");
         data["type"] = episode.GetType().Name.Escape();
 
-        var notification = new ExpoNotificationRequest
+        var notification = new NotificationRequest
         {
             Title = title,
             Body = string.Join("\n", body),

@@ -14,13 +14,9 @@
   <ItemGroup>
     <PackageReference Include="Jellyfin.Controller" Version="10.11.10" />
     <PackageReference Include="Jellyfin.Model" Version="10.11.10" />
-    <PackageReference Include="Namotion.Reflection" Version="3.1.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Newtonsoft.Json.Schema" Version="3.0.16" />
-    <PackageReference Include="NJsonSchema" Version="11.0.2" />
     <PackageReference Include="System.Net.Http.Json" Version="9.0.0" />
     <PackageReference Include="System.Security.Claims" Version="4.3.0" />
-    <PackageReference Include="YamlDotNet" Version="16.0.0" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.1" />
   </ItemGroup>
 
@@ -29,8 +25,4 @@
     <PackageReference Include="SmartAnalyzers.MultithreadingAnalyzer" Version="1.1.31" PrivateAssets="All" />
   </ItemGroup>
 
-  <ItemGroup>
-      <None Remove="Pages\**\*" />
-      <EmbeddedResource Include="Pages\**\*" />
-  </ItemGroup>
 </Project>

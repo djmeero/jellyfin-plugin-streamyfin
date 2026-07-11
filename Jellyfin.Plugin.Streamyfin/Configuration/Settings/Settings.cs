@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Jellyfin.Data.Enums;
 using MediaBrowser.Model.Querying;
-using NJsonSchema.Annotations;
 using System.Xml.Serialization;
 using System.Collections.ObjectModel;
 
@@ -31,7 +30,6 @@ public class Lockable<T>
 
 public class Home
 {
-  [NotNull]
   [Display(Name = "Sections")]
   // public SerializableDictionary<string, Section>? sections { get; set; }
   public Section[]? sections { get; set; }
@@ -39,22 +37,17 @@ public class Home
 
 public class Section
 {  
-  [NotNull]
   public string title { get; set; }
 
-  [NotNull]
   [Display(Name = "Media poster orientation")]
   public SectionOrientation? orientation { get; set; }
 
-  [NotNull]
   [Display(Name = "Items", Description = "Customize the Items API query")]
   public Items? items { get; set; }
   
-  [NotNull]
   [Display(Name = "Next up", Description = "Customize the Tv Shows Next Up API query")]
   public NextUp? nextUp { get; set; }
 
-  [NotNull]
   [Display(Name = "Latest", Description = "Customize the Latest API query")]
   public Latest? latest { get; set; }
   
@@ -159,21 +152,17 @@ public class SuggestionsArgs
 /// </summary>
 public class Settings
 {
-    [NotNull]
     [Display(Name = "Home view", Description = "Customize the appearance of the apps home page")]
     public Lockable<Home>? home { get; set; }
 
     // Media Controls
-    [NotNull]
     [Display(Name = "Forward skip time", Description = "The amount of time in seconds you want to be able to skip forward during playback")]
     public Lockable<int>? forwardSkipTime { get; set; } // = 30;
     
-    [NotNull]
     [Display(Name = "Rewind skip time", Description = "The amount of time in seconds you want to be able to rewind during playback")]
     public Lockable<int>? rewindSkipTime { get; set; } // = 10;
     
     // Audio
-    [NotNull]
     [Display(Name = "Remember audio selection", Description = "Allows you to set the audio language from the previous played item")]
     public Lockable<bool>? rememberAudioSelections { get; set; } // = true;
     // TODO create type converter for CultureDto
@@ -182,100 +171,78 @@ public class Settings
     
     // Subtitles
     // public Lockable<CultureDto?>? defaultSubtitleLanguage { get; set; }
-    [NotNull]
     [Display(Name = "Subtitle playback mode", Description = "Setting to determine when subtitles will automatically play during video playback")]
     public Lockable<SubtitlePlaybackMode>? subtitleMode { get; set; }
 
-    [NotNull]
     [Display(Name = "Remember subtitle selection", Description = "Allows you to set the subtitle language from the previous played item")]
     public Lockable<bool>? rememberSubtitleSelections { get; set; } // = true;
     
-    [NotNull]
     [Display(Name = "Subtitle scale size", Description = "Adjust the subtitle size during video playback")]
     public Lockable<int>? subtitleSize { get; set; } // = 80;
 
     // Other
-    [NotNull]
     [Display(Name = "Auto rotate", Description = "Grant ability to auto rotate during video playback")]
     public Lockable<bool>? autoRotate { get; set; } // true
     
-    [NotNull]
     [Display(Name = "Default video orientation", Description = "Lock orientation during video playback")]
     public Lockable<OrientationLock>? defaultVideoOrientation { get; set; }
     
-    [NotNull]
     [Display(Name = "Safe Area in video controls", Description = "Enable or disable the safe area for video controls")]
     public Lockable<bool>? safeAreaInControlsEnabled { get; set; } // = true;
     
-    [NotNull]
     [Display(Name = "Show custom menu links", Description = "Show custom menu links in Jellyfin's web configuration")]
     public Lockable<bool>? showCustomMenuLinks { get; set; } // = false;
     
-    [NotNull]
     [Display(Name = "Hidden libraries", Description = "Enter all library Ids you want hidden from users")]
     public Lockable<string[]>? hiddenLibraries { get; set; } // = [];
 
-    [NotNull]
     [Display(Name = "Disable haptic feedback")]
     public Lockable<bool>? disableHapticFeedback { get; set; } // = false;
 
-    [NotNull]
     [Display(Name = "Default playback quality")]
     public Lockable<Bitrate?>? defaultBitrate { get; set; } // = null/MAX;
 
-    [NotNull]
     [Display(Name = "Max auto play episode count")]
     public Lockable<int>? maxAutoPlayEpisodeCount { get; set; } // = 3 
 
     // Swipe controls
 
-    [NotNull]
     [Display(Name = "Horizontal swipe to skip")]
     public Lockable<bool>? enableHorizontalSwipeSkip { get; set; } // = true 
     
-     [NotNull]
     [Display(Name = "Left side brightness control")]
     public Lockable<bool>? enableLeftSideBrightnessSwipe { get; set; } // = true
 
-    [NotNull]
     [Display(Name = "Right side volume control")]
     public Lockable<bool>? enableRightSideVolumeSwipe { get; set; } // = true
 
     // region Plugins
     // Seerr
-    [NotNull]
     [Display(Name = "Seerr Server URL", Description = "Enter the URL for your Seerr server. **Jellyfin authentication is required**")]
     public Lockable<string>? seerrServerUrl { get; set; }
 
     // Marlin Search
-    [NotNull]
     [Display(Name = "Default search engine", Description = "Enter the search engine you want to use in streamyfin")]
     public Lockable<SearchEngine>? searchEngine { get; set; } // = SearchEngine.Jellyfin;
     
-    [NotNull]
     [Display(Name = "Marlin server URL", Description = "Enter the URL for your Marlin server")]
     public Lockable<string>? marlinServerUrl { get; set; }
 
     // Streamystats
-    [NotNull]
     [Display(Name = "Streamystats Server URL", Description = "Enter the URL for your Streamystats server")]
     public Lockable<string>? streamyStatsServerUrl { get; set; }
     
-    [NotNull]
     [Display(Name = "Streamystats Movie Recommendations", Description = "Allow Streamystats to provide movie recommendations using your watch history")]
     public Lockable<bool>? streamyStatsMovieRecommendations { get; set; }
     
-    [NotNull]
     [Display(Name = "Streamystats Series Recommendations", Description = "Allow Streamystats to provide series recommendations using your watch history")]
     public Lockable<bool>? streamyStatsSeriesRecommendations { get; set; }
     
-    [NotNull]
     [Display(Name = "Streamystats Promoted Watchlists", Description = "Allow Streamystats to promote watchlists using your watch history")]
     public Lockable<bool>? streamyStatsPromotedWatchlists { get; set; }
     // endregion Plugins
     
     // Misc.
-    [NotNull]
     [Display(Name = "Library options", Description = "Customize how you want Streamyfin's library tab to look")]
     public Lockable<LibraryOptions>? libraryOptions { get; set; }
 

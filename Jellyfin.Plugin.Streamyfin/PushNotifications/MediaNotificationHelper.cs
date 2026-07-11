@@ -12,7 +12,7 @@ namespace Jellyfin.Plugin.Streamyfin.PushNotifications;
 
 static class MediaNotificationHelper
 {
-    public static ExpoNotificationRequest? CreateMediaNotification(
+    public static NotificationRequest? CreateMediaNotification(
         LocalizationHelper localization,
         string title,
         List<string> body, 
@@ -105,7 +105,7 @@ static class MediaNotificationHelper
         body.Add(name);
         data["type"] = item.GetType().Name.Escape();
 
-        return new ExpoNotificationRequest
+        return new NotificationRequest
         {
             Title = title,
             Body = string.Join("\n", body),

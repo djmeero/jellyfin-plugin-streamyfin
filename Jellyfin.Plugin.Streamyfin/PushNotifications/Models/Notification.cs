@@ -50,37 +50,33 @@ public class Notification
     public bool IsAdmin { get; set; }
 
     /// <summary>
-    /// Optional JSON object delivered to the client app inside the Expo push payload.
+    /// Optional JSON object delivered to the client app inside the FCM data payload.
     /// Use this to carry deep-link metadata that the client can read on tap (e.g. {"type":"movie","id":"..."},
     /// {"type":"series","seriesId":"..."}, or {"type":"settings","page":"appearance"}).
-    /// Forwarded verbatim into ExpoNotificationRequest.data; total payload must stay under ~4KiB.
+    /// Forwarded into NotificationRequest.data (values are stringified); total payload must stay under ~4KiB.
     /// </summary>
     [JsonProperty(PropertyName = "data", NullValueHandling = NullValueHandling.Ignore)]
     public object? Data { get; set; }
 
     /// <summary>
     /// Optional rich-media attachment displayed alongside the notification (e.g. a movie poster).
-    /// The image URL must be publicly reachable over HTTPS. Forwarded as ExpoNotificationRequest.richContent.
-    /// When set, mutableContent is automatically enabled so iOS can fetch and render the image.
+    /// The image URL must be publicly reachable over HTTPS. Forwarded as NotificationRequest.richContent.
     /// </summary>
     [JsonProperty(PropertyName = "richContent", NullValueHandling = NullValueHandling.Ignore)]
     public RichContent? RichContent { get; set; }
 
-    public ExpoNotificationRequest ToExpoNotification() => new()
+    public NotificationRequest ToNotificationRequest() => new()
     {
         Title = Title,
         Subtitle = Subtitle,
-        Body = Body,
+        Body = Body ?? string.Empty,
         Data = NormalizeJsonValue(Data),
-        RichContent = RichContent,
-        // iOS requires mutableContent=true for the notification service extension to fetch
-        // and attach the image. Auto-enable when an image is provided so callers don't have to.
-        MutableContent = !string.IsNullOrWhiteSpace(RichContent?.Image)
+        RichContent = RichContent
     };
 
     /// <summary>
     /// ASP.NET Core binds <c>object?</c> request fields as <see cref="JsonElement"/> (System.Text.Json),
-    /// but the outbound Expo payload is serialized with Newtonsoft.Json — which doesn't understand
+    /// but the outbound FCM payload is serialized with Newtonsoft.Json — which doesn't understand
     /// JsonElement and would emit {"ValueKind":1} instead of the actual data. Convert to native CLR
     /// containers so Newtonsoft can serialize the value transparently.
     /// </summary>

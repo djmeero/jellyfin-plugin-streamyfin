@@ -13,7 +13,7 @@ namespace Jellyfin.Plugin.Streamyfin;
 /// <summary>
 /// The main plugin.
 /// </summary>
-public class StreamyfinPlugin : BasePlugin<PluginConfiguration>, IHasWebPages
+public class StreamyfinPlugin : BasePlugin<PluginConfiguration>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="Plugin"/> class.
@@ -25,10 +25,17 @@ public class StreamyfinPlugin : BasePlugin<PluginConfiguration>, IHasWebPages
     {
         Instance = this;
         Database = new Storage.Database(applicationPaths.DataPath);
+        PluginDataPath = applicationPaths.DataPath;
         _prefix = GetType().Namespace;
     }
-    
+
     public Storage.Database Database { get; }
+
+    /// <summary>
+    /// Jellyfin data directory the plugin stores its files in (SQLite db,
+    /// FCM service-account json).
+    /// </summary>
+    public string PluginDataPath { get; }
 
     /// <inheritdoc />
     public override string Name => "Streamyfin";

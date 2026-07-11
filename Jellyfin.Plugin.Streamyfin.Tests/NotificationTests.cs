@@ -19,15 +19,15 @@ public class NotificationTests(ITestOutputHelper output)
     private const string VirtualToken = "...";
 
     /// <summary>
-    /// Assert we can send a single notification and receive a proper ExpoNotificationResponse
+    /// Assert we can send a single notification and receive a proper NotificationResponse
     /// </summary>
     [Fact]
-    public void SingleExpoPushNotificationTest()
+    public void SingleFcmPushNotificationTest()
     {
-        var request = new ExpoNotificationRequest
+        var request = new NotificationRequest
         {
             To = new List<string> { VirtualToken },
-            Title = "Expo Push Test",
+            Title = "FCM Push Test",
             Subtitle = "iOS subtitle",
             Body = "All platforms should see this body",
         };
@@ -40,20 +40,20 @@ public class NotificationTests(ITestOutputHelper output)
     }
     
     /// <summary>
-    /// Assert we can send a batch of notifications and receive a proper ExpoNotificationResponse
+    /// Assert we can send a batch of notifications and receive a proper NotificationResponse
     /// </summary>
     [Fact]
-    public void BatchExpoPushNotificationTest()
+    public void BatchFcmPushNotificationTest()
     {
-        var notifications = new List<ExpoNotificationRequest>();
+        var notifications = new List<NotificationRequest>();
 
         for (var i = 0; i < 5; i++)
         {
             notifications.Add(
-                new ExpoNotificationRequest
+                new NotificationRequest
                 {
                     To = new List<string> { VirtualToken },
-                    Title = $"Expo Push Test {i}",
+                    Title = $"FCM Push Test {i}",
                     Subtitle = $"iOS subtitle {i}",
                     Body = "All platforms should see this body",
                 }
