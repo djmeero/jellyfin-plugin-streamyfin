@@ -318,7 +318,11 @@ public class StreamyfinController : ControllerBase
     {
       case "ISSUE_CREATED":
         // Only the reporter exists so far — alert admins instead of self-notifying.
-        SendToAdmins(title, $"A new issue has been opened for {item}", payload.Image, deepLink);
+        // A missing config entry (pre-upgrade XML) counts as enabled.
+        if (StreamyfinPlugin.Instance?.Configuration.Config?.notifications?.SeerrIssueCreated is not { Enabled: false })
+        {
+          SendToAdmins(title, $"A new issue has been opened for {item}", payload.Image, deepLink);
+        }
         break;
 
       case "ISSUE_COMMENT":

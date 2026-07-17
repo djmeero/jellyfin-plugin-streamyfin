@@ -55,6 +55,10 @@ public class PluginConfiguration : BasePluginConfiguration
     ItemAdded = new()
     {
       Enabled = true
+    },
+    SeerrIssueCreated = new()
+    {
+      Enabled = true
     }
   };
 

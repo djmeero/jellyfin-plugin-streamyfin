@@ -62,4 +62,9 @@ public class Notifications
     [Display(Name = "Item added", Description = "Get notified when jellyfin adds new Movies or Episodes")]
     [JsonPropertyName(name: "itemAdded")]
     public ItemAddedNotificationConfiguration? ItemAdded { get; set; }
+
+    [NotNull]
+    [Display(Name = "Seerr issue created", Description = "Admins get notified when a new Seerr issue is opened.")]
+    [JsonPropertyName(name: "seerrIssueCreated")]
+    public NotificationConfiguration? SeerrIssueCreated { get; set; }
 }

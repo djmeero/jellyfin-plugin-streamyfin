@@ -24,7 +24,10 @@ public class LibraryOptions
 public class Lockable<T>
 {
   public bool locked { get; set; } = false;
-  public required T value { get; set; }
+  // Not `required`: Jellyfin's serializer omits null values on GET, so a
+  // required member would make the config document impossible to roundtrip
+  // through POST /Plugins/{id}/Configuration (500 on any save).
+  public T value { get; set; } = default!;
 }
 
 
