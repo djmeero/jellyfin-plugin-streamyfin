@@ -56,6 +56,10 @@ public class JellyseerrWebhookPayload
   [JsonPropertyName("notify_user")]
   public string? NotifyUser { get; set; }
 
+  /// <summary>Jellyfin username of the person who made the request (request events).</summary>
+  [JsonPropertyName("requested_by")]
+  public string? RequestedBy { get; set; }
+
   /// <summary>TMDB id of the media — used to deep-link to the Jellyfin item.</summary>
   [JsonPropertyName("tmdb_id")]
   public string? TmdbId { get; set; }
@@ -280,13 +284,54 @@ public class StreamyfinController : ControllerBase
     }
 
     // Non-issue events (media requests) — notify only the targeted user, i.e. the
-    // requester. Preserves existing request-notification behaviour.
+    // requester. Seerr's {{message}} is the TMDB overview, which says nothing
+    // about what happened to the request, so the body is written from the event
+    // type instead (the media title is already the notification title).
     if (!type.StartsWith("ISSUE_", StringComparison.Ordinal))
     {
-      if (!string.IsNullOrWhiteSpace(payload.NotifyUser))
+      // A request awaiting approval is an admin event, not a requester one —
+      // Seerr targets request managers here and may leave notify_user empty, so
+      // this is handled before the notify_user guard below.
+      if (type == "MEDIA_PENDING")
       {
-        SendToUsernames([payload.NotifyUser!], title, body, payload.Image);
+        // A missing config entry (pre-upgrade XML) counts as enabled.
+        if (StreamyfinPlugin.Instance?.Configuration.Config?.notifications?.SeerrRequestCreated is not { Enabled: false })
+        {
+          var who = string.IsNullOrWhiteSpace(payload.RequestedBy) ? "Someone" : payload.RequestedBy!;
+          var what = string.IsNullOrWhiteSpace(payload.Subject) ? "new media" : payload.Subject!;
+          // No title: the whole sentence reads better as a single line, and an
+          // admin who requested it themselves doesn't need telling.
+          SendToAdmins(null, $"{who} has requested {what}", payload.Image, excludeUsername: payload.RequestedBy);
+        }
+        return new OkResult();
       }
+
+      if (string.IsNullOrWhiteSpace(payload.NotifyUser))
+      {
+        return new OkResult();
+      }
+
+      var requestBody = type switch
+      {
+        "MEDIA_APPROVED" or "MEDIA_AUTO_APPROVED" => "Your request has been approved",
+        "MEDIA_DECLINED" => "Your request has been declined",
+        "MEDIA_AVAILABLE" => "Your request is now available",
+        "MEDIA_FAILED" => "Your request could not be processed",
+        _ => body,
+      };
+
+      // Only fulfilled requests exist in the library, so this resolves (and the
+      // tap opens the title) for MEDIA_AVAILABLE and is null for the rest.
+      var mediaItem = ResolveJellyfinItem(payload.TmdbId, payload.MediaType);
+      object? mediaLink = mediaItem == null
+        ? null
+        : new
+        {
+          type = string.Equals(mediaItem.Value.itemType, "Series", StringComparison.Ordinal) ? "series" : "movie",
+          id = mediaItem.Value.id,
+        };
+
+      SendToUsernames([payload.NotifyUser!], title, requestBody, payload.Image, mediaLink);
       return new OkResult();
     }
 
@@ -417,17 +462,24 @@ public class StreamyfinController : ControllerBase
   }
 
   /// <summary>
-  /// Push a single notification to every Jellyfin admin's device tokens.
+  /// Push a single notification to every Jellyfin admin's device tokens,
+  /// optionally skipping one admin (e.g. the person who triggered the event).
   /// </summary>
-  private void SendToAdmins(string? title, string body, string? image, object? data = null)
+  private void SendToAdmins(string? title, string body, string? image, object? data = null, string? excludeUsername = null)
   {
-    SendTokens(
-      _userManager.GetAdminDeviceTokens().Select(t => t.Token).ToList(),
-      title,
-      body,
-      image,
-      data
-    );
+    var tokens = _userManager.GetAdminDeviceTokens();
+
+    if (!string.IsNullOrWhiteSpace(excludeUsername))
+    {
+      var excluded = _userManager.GetUsers()
+        .FirstOrDefault(u => string.Equals(u.Username, excludeUsername, StringComparison.OrdinalIgnoreCase));
+      if (excluded != null)
+      {
+        tokens = tokens.Where(t => t.UserId != excluded.Id).ToList();
+      }
+    }
+
+    SendTokens(tokens.Select(t => t.Token).ToList(), title, body, image, data);
   }
 
   private void SendTokens(List<string> tokens, string? title, string body, string? image, object? data = null)

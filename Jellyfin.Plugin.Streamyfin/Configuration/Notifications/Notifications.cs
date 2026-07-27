@@ -67,4 +67,9 @@ public class Notifications
     [Display(Name = "Seerr issue created", Description = "Admins get notified when a new Seerr issue is opened.")]
     [JsonPropertyName(name: "seerrIssueCreated")]
     public NotificationConfiguration? SeerrIssueCreated { get; set; }
+
+    [NotNull]
+    [Display(Name = "Seerr request created", Description = "Admins get notified when a user requests media that needs approval.")]
+    [JsonPropertyName(name: "seerrRequestCreated")]
+    public NotificationConfiguration? SeerrRequestCreated { get; set; }
 }
