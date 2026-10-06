@@ -42,7 +42,10 @@ public class ItemAddedService : BaseEvent, IHostedService
         ) return;
 
         var item = itemChangeEventArgs.Item;
-        var enabledLibraries = Config.notifications.ItemAdded.EnabledLibraries;
+        // Belt and braces: a config written by an older build can still carry a
+        // null here, and this handler runs inside Jellyfin's ItemAdded event —
+        // throwing takes down the notification for the real media item.
+        var enabledLibraries = Config.notifications.ItemAdded.EnabledLibraries ?? [];
         var virtualFolder = _libraryManager.GetVirtualFolders()
             .Find(folder => folder.Locations.Any(location => item?.Path?.Contains(location) == true));
 
@@ -54,6 +57,21 @@ public class ItemAddedService : BaseEvent, IHostedService
         {
             _logger.LogInformation(
                 "Failed to notify about item {0} - {1}. Library {2} currently not enabled for notifications.",
+                item.GetType().Name, item.Name.Escape(), virtualFolder.Name
+            );
+            return;
+        }
+
+        var excludedLibraries = Config.notifications.ItemAdded.ExcludedLibraries ?? [];
+        if (
+            virtualFolder != null &&
+            excludedLibraries.Any(excluded =>
+                string.Equals(excluded, virtualFolder.Name, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(excluded, virtualFolder.ItemId, StringComparison.OrdinalIgnoreCase))
+        )
+        {
+            _logger.LogInformation(
+                "Skipping item {0} - {1}. Library {2} is excluded from notifications.",
                 item.GetType().Name, item.Name.Escape(), virtualFolder.Name
             );
             return;

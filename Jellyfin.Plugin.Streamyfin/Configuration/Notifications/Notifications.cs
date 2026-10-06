@@ -21,9 +21,19 @@ public class NotificationConfiguration
 
 public class ItemAddedNotificationConfiguration: NotificationConfiguration
 {
+    // Initialized so a config document without an enabledLibraries entry (the
+    // shape written when the event is first enabled) deserializes to an empty
+    // array rather than null — a null here threw inside the ItemAdded handler.
     [Display(Name = "Enabled libraries", Description = "Enter all library Ids you want to receive notifications from")]
     [JsonPropertyName(name: "enabledLibraries")]
-    public string[] EnabledLibraries { get; set; }
+    public string[] EnabledLibraries { get; set; } = [];
+
+    // Matched case-insensitively against a library's name or id. Defaults to
+    // the Clips library, which holds the clip feeder and trailer downloads —
+    // machine-generated content nobody wants a push about.
+    [Display(Name = "Excluded libraries", Description = "Library names or Ids that never send an item-added notification.")]
+    [JsonPropertyName(name: "excludedLibraries")]
+    public string[] ExcludedLibraries { get; set; } = ["Clips"];
 }
 
 public class UserNotificationConfig : NotificationConfiguration
